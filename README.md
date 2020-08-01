@@ -4,3 +4,5 @@ itokareva microservices repository
 # Домашняя работа 17
 
   Технологии контейнеризации. Введение в docker.
+
+1)
