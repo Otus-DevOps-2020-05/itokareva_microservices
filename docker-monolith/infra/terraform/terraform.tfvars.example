@@ -1,0 +1,14 @@
+cloud_id                 = "11111112222222222222"
+folder_id                = "33333333333344444444"
+image_id                 = "aaaaaaaaaabbbbbbbbbb"
+public_key_path          = "path to public key"
+subnet_id                = "e9bppj6gn22qaqp3o0jt"
+service_account_key_file = "path to key.json"
+private_key_path         = "path to public key"
+account_id               = "aaa222aaa222aaa222aa"
+counter                  = 3
+db_disk_image            = "lalalalalalalalalala"
+app_disk_image           = "tratatatratatatratat"
+puma_service             = "pumpumpumpumpumpumpu"
+deploy_script            = "depdepdepdepdepdepde"
+do_deploy                = true
