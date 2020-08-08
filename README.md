@@ -8,7 +8,7 @@ itokareva microservices repository
 1) Установлены Docker, docker-compose, docker-machine
 2) Выполнено задание со (*) о сравнении команд docker inspect  <u_container_id> и <u_image_id>
    результат в файле dockermonolith/docker-1.log
-3) Создан docker-monolith/Dockerfile, собран образ reddit:latest (latest - tag), запущен контейнер с этим образом, 
+3) Создан docker-monolith/Dockerfile, собран образ reddit:latest (latest - tag), запущен контейнер с этим образом,
    проверен результат в браузере
 4) Зарегистрировалась на Docker hub
 5) Загрузка образа на Docker hub itokareva/otus-reddit:1.0
@@ -17,8 +17,8 @@ itokareva microservices repository
 
 1) Создан образ с "голым" Ubuntu с помощью packer
 2) Созданы виртуальные машины (counter=2)
-3) Зоздан playbook infra/playbooks/create_docker_host.yml для запуска docker-machine на локальной машине, переключение env и запуск докера из созданного образа. 
-Все с использованием динамического инвентори inventory.sh     	
+3) Зоздан playbook infra/playbooks/create_docker_host.yml для запуска docker-machine на локальной машине, переключение env и запуск докера из созданного образа.
+Все с использованием динамического инвентори inventory.sh
 4) все рабочие файлы в папке docker-monolith/infra
 
 # Домашняя работа 18
@@ -26,11 +26,11 @@ itokareva microservices repository
   Docker-образы. Микросервисы
 
 1) Разбили наше приложение на 4 компонента:
-   - post-py - сервис отвечающий за написание постов 
-   - comment - сервис отвечающий за написание комментариев 
+   - post-py - сервис отвечающий за написание постов
+   - comment - сервис отвечающий за написание комментариев
    - ui - веб-интерфейс, работающий с другими сервисами
    - микросервис с mongo
-2) Создали Dockerfile для post-py, comment, ui. 
+2) Создали Dockerfile для post-py, comment, ui.
 3) Построили образы. Образ mongo скачали с Docker hub
 4) Создали сеть приложения reddit
 5) Запустили наши контейнеры:
@@ -50,7 +50,7 @@ docker run -d --env COMMENT_DATABASE_HOST=comment_db1 --network=reddit --network
 docker run -d --env COMMENT_SERVICE_HOST=comment1 --env POST_SERVICE_HOST=post1 --network=reddit -p 9292:9292 itokareva/ui:1.0
 
 Задание со (**)
- 
+
 7) Улучшаем образ микросервиса ./ui/Dockerfile
    Образ на основе alpine и с очисткой компонентов, которые нужны были для сборки в файле: ./ui/Dockerfile.1
 
@@ -63,7 +63,3 @@ itokareva/ui            1.0                 c6b1da16bb68        40 hours ago    
 8) Подключили volume с именем  reddit_db к нашей бд mongo
 
 9) теперь состояние нашей базы сохраняется в volume и посты не пропадают после перезагрузки сервисов
-
-
-
- 
