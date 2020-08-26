@@ -1,0 +1,24 @@
+{
+  "variables": {
+    "folder_id": "",
+    "service_account_key_file": ""
+  },
+   "builders": [
+        {
+            "type": "yandex",
+            "service_account_key_file": "{{user `service_account_key_file`}}",
+            "folder_id": "{{user `folder_id`}}",
+            "source_image_family": "ubuntu-1804-lts",
+            "instance_cores": 2,
+            "instance_mem_gb": 4,
+            "disk_size_gb": 50, 
+            "image_name": "gitlab-ci-vm-{{timestamp}}",
+            "image_family": "gitlab-ci-vm",
+            "ssh_username": "ubuntu",
+            "platform_id": "standard-v1",
+            "use_ipv4_nat": "true",
+            "zone": "ru-central1-a",
+            "subnet_id": "e9bppj6gn22qaqp3o0jt"
+        }
+    ]
+}
