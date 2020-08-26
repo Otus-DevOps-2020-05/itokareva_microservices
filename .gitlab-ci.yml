@@ -23,6 +23,8 @@ test_unit_job:
   stage: test
 #   services:  
 #   - mongo:latest 
+#  script:
+#    - ruby simpletest.rb 
   image: docker:19.03.12
   script:
     - docker run -t reddit:$CI_COMMIT_REF_NAME /bin/bash -c 'cd reddit && ruby simpletest.rb'
