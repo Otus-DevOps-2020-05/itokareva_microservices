@@ -87,4 +87,21 @@ itokareva/ui            1.0                 c6b1da16bb68        40 hours ago    
 
 Задание со (**)
 
-Создан файл docker-compose.override.yml, позволяющий запускать puma для руби приложений в дебаг режиме с двумя воркерами (флаги --debug и -w 2)        
+Создан файл docker-compose.override.yml, позволяющий запускать puma для руби приложений в дебаг режиме с двумя воркерами (флаги --debug и -w 2)  
+
+# Домашняя работа 19   
+
+
+Устройство Gitlab CI. Устройство Gitlab CI. Построение процесса Построение процесса непрерывной поставки 
+
+1) Cоздана YC-виртуальная машина gitlab-ci-vm1 с помощью terraform
+2) С помощью gitlab-ci/infra/playbooks/create_docker_host.yml устанавливаем docker на виртуальной машине:
+ansible-playbook playbooks/create_docker_host.yml -t create_docker
+3) устанавливаем docker-compose на ВМ:
+ansible-playbook playbooks/install_docker_compose.yml
+4) запускаем gitlab в docker-контейнере, запускаем контейнер с gitlub-runner и регистрируем его (*). Все с помощью play-book docker_compose.yml:
+ansible-playbook playbooks/docker_compose.yml -t web  -vvv
+5) Настраиваем pipelines:
+   - запуск приложения reddit в этапе pipeline в этапе пайплайна build (*) 
+   - настроена интеграция в slack на исменеие статуса pipeline
+      

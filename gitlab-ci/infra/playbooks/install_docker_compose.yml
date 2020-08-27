@@ -1,0 +1,16 @@
+---
+- name: Install docker-compose
+  hosts: all
+  become: true
+  tasks:
+  - name: create gitlab-ci-vm
+    command: "mkdir -p /srv/gitlab/config /srv/gitlab/data /srv/gitlab/logs"
+
+  - name: Run the equivalent of "apt-get update" as a separate step
+    apt:
+      update_cache: yes
+  # непосредственно установка
+  - name: Install docker-compose
+    apt:
+      name: ['docker-compose']
+      state: present
