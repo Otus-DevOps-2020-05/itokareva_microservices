@@ -1,0 +1,37 @@
+---
+- name: Start Docker container
+  hosts: all
+  become: true
+  tasks:
+
+  - name: run docker-compose
+    docker_compose:
+       project_name: prometheus
+       definition:
+         version: '3.3'
+         services:
+           prometheus:
+             image: 'prom/prometheus'
+#             restart: always
+#             hostname: 'gitlab.example.com'
+#             environment:
+#               GITLAB_OMNIBUS_CONFIG: 
+#                 external_url 'http://{{ hostvars[item]['host_ext_ip'] }}'
+#             volumes:
+#                - "/srv/gitlab/config:/etc/gitlab"
+#                - "/srv/gitlab/logs:/var/log/gitlab"
+#                - "/srv/gitlab/data:/var/opt/gitlab"
+             ports:
+               - "9090:9090"
+#               - "443:443"
+#               - "2222:22"
+#           gitlab-runner:
+#             image: gitlab/gitlab-runner:latest
+#             restart: always
+#             volumes:
+#               -  /var/run/docker.sock:/var/run/docker.sock
+#             command: register  --url http://{{ hostvars[item]['host_ext_ip'] }}/ --non-interactive --locked=false --name DockerRunner  --executor docker --docker-image "docker:19.03.12" --docker-privileged  --registration-token 'VwG8hJrH6aZtyG24vyvL' --docker-volumes /var/run/docker.sock:/var/run/docker.sock --tag-list "linux,xenial,ubuntu,docker"  --run-untagged
+
+    with_items:
+      - "{{ groups['docker-host'] }}"
+    tags: web

@@ -1,0 +1,90 @@
+version: '3.3'
+services:
+  post_db:
+    image: mongo:3.2
+    volumes:
+      - post_db:/data/db
+    networks:
+#      - back_net:
+      back_net:
+        aliases:
+          - post_db
+          - comment_db
+  ui:
+    env_file: .env
+#    build: ./ui
+    image: ${USERNAME}/ui:${UI_VER}
+    ports:
+      - ${PORT_H}:${PORT_C}/${PRO}
+    networks:
+      - front_net
+  post:
+    env_file: .env
+#    build: ./post-py
+    image: ${USERNAME}/post:${POST_VER}
+    environment:
+      - POST_DATABASE_HOST=post_db
+    networks:
+      - back_net
+      - front_net
+  comment:
+    env_file: .env
+#    build: ./comment
+    image: ${USERNAME}/comment:${COM_VER}
+    environment: 
+      - COMMENT_DATABASE_HOST=comment_db
+    networks:
+      - back_net
+      - front_net
+  prometheus:
+    image: ${USERNAME}/prometheus
+    ports:
+      - '9090:9090'
+    volumes:
+      - prometheus_data:/prometheus
+    command: # Передаем доп параметры в командной строке
+      - '--config.file=/etc/prometheus/prometheus.yml'
+      - '--storage.tsdb.path=/prometheus'
+      - '--storage.tsdb.retention=1d' # Задаем время хранения метрик в 1 день
+    networks:
+        - back_net
+        - front_net 
+  node-exporter:
+    image: prom/node-exporter:v0.15.2
+    user: root
+    volumes:
+      - /proc:/host/proc:ro
+      - /sys:/host/sys:ro
+      - /:/rootfs:ro
+    command:
+      - '--path.procfs=/host/proc'
+      - '--path.sysfs=/host/sys'
+      - '--collector.filesystem.ignored-mount-points="^/(sys|proc|dev|host|etc)($$|/)"' 
+    networks:
+       - back_net
+       - front_net
+  mongo-exporter:
+    image: elarasu/mongodb_exporter@sha256:6d58466a866b25cff5fd19617790d188ebba2474af9e02bb8accb85b5147b69b
+    environment:
+      - MONGODB_URL=mongodb://post_db:27017 
+    networks:
+      - back_net
+  blackbox-exporter:
+    image: cloudprober/cloudprober:v0.10.9
+    environment:
+      - CLOUDPROBER_HOST=0.0.0.0
+    volumes:
+      - ./cloudprober.cfg:/etc/cloudprober.cfg
+    ports:
+      - '9313:9313'
+    networks:
+      - back_net
+      - front_net
+
+volumes:
+  post_db:
+  prometheus_data:
+
+networks:
+  front_net:
+  back_net: 

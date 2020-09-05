@@ -1,0 +1,21 @@
+---
+# create docker-machine 
+- hosts: 127.0.0.1   
+  connection: local
+  gather_facts: no
+
+  tasks:
+    - debug: var=hostvars
+
+    - name: create docker-host
+      command: "docker-machine create --driver generic --generic-ip-address={{ hostvars[item]['host_ext_ip'] }} --generic-ssh-user ubuntu --generic-ssh-key ~/.ssh/id_rsa {{ hostvars[item]['host_name'] }}"
+      with_items:
+        - "{{ groups['docker-host'] }}"
+      tags: create_docker
+    - name: apply env
+      shell: |
+        eval "$(docker-machine env {{ hostvars[item]['host_name'] }})"
+        docker run --name reddit -d -p 9292:9292 itokareva/otus-reddit:1.0
+      with_items:
+        - "{{ groups['docker-host'] }}"
+      tags: deploy

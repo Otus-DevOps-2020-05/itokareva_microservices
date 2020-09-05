@@ -1,9 +1,0 @@
-cloud_id                 = "b1gsk4n3cpbfjt5thp9n"
-folder_id                = "b1g2p4nhif421l0oda0n"
-public_key_path          = "/home/itokareva/.ssh/id_rsa.pub"
-subnet_id                = "e9bppj6gn22qaqp3o0jt"
-service_account_key_file = "/home/itokareva/yc_service/key.json"
-private_key_path         = "/home/itokareva/.ssh/id_rsa"
-account_id               = "ajenii52dr14iojef04o"
-counter                  = 2 
-image_id                 = "fd8433quj6miugrmcij9"
