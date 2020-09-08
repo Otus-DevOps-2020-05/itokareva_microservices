@@ -193,7 +193,7 @@ docker service create \
       - ./grafana:/etc/grafana/provisioning/
 
 в файле docker/docker-compose-monitoring.yml. Все конфигурационные файлы в docker/grafana.
-
+1
    
 
   
