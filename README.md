@@ -123,4 +123,80 @@ ansible-playbook playbooks/docker_compose.yml -t web  -vvv
      make build # сборка образов всех микросервисов
      make blackbox_push # регистрация образа конкретного микросервиса на docker hub
      make push # регистрация всех микросервисов на docker hub  
+ 
+# Домашняя работа 21
+
+Мониторинг Мониторинг приложения и приложения и инфраструктуры 
+
+1) Наблюдение за состоянием Docker контейнеров c помощью cAdvisor.
+Все метрики начинаются с префикса container_. По пути /metrics все собираемые метрики публикуются для сбора Prometheus.
+Проверено, что метрики собираются в prometheus.
+2) Добавлен новый сервис GRAFANA Grafana для визуализации данных из Prometheus.
+3) Импортирован дашборд "Docker and system monitoring" (DockerMonitoring.json) с сайта уже созданных официальных и комьюнити дашбордов https://grafana.com/grafana/dashboards
+4) Добавлен мониторинг post-сервиса в prometheus
+5) Созданы 2 дашборда в графане для мониторинга сервиса ui с использованием метрик prometheus типа counter и histogram (ui_service_monitoring-1599145568713.json).
+6) Для мониторинга бизнес-логики построены 2 дашборда: post_count, comment_count (Business_Logic_Monitoring-1599146817349.json).
+7) Настроен Alertmanager с отправкой нотификаций в slack
+8) Добавлены alert rulls в prometheus с правилом срабатывния, когда один из сервисов в статусе down. Соббщения о падении сервиса приходят в slack.
+
+Задание (*)
+1) Поднят docker swarm (init + docker swarm join waker)
+   docker swarm init --advertise-addr ip-host1
+   docker swarm join-token worker
+   на другой машине docker swarm join --token SWMTKN-1-24b7t7txn64so15uh9bz25runesavsyck261vxghzxuildpplh-c0yl5p3qbrw4yu9tdojq9ed6t ip-host1:2377
+   
+docker node ls
+ID                            HOSTNAME            STATUS              AVAILABILITY        MANAGER STATUS      ENGINE VERSION
+ie0liejtgkp58whk1d4q62ik3 *   docker-host1        Ready               Active              Leader              19.03.12
+u9awln1b4iqjvcmim7uiqwbyt     itokareva-otus      Ready               Active                                  19.03.12
+
+2) Запущены сервисы prometheus и grafana:
+
+docker network create --driver overlay my-network
+
+docker service create --replicas 1 --name my-grafana --publish published=3000,target=3000,protocol=tcp \ 
+--mount source=appgrafana_data,target=/var/lib/grafana --env GF_SECURITY_ADMIN_USER=admin \
+--env GF_SECURITY_ADMIN_PASSWORD=secret --network my-network grafana/grafana:5.0.0
+
+docker service create --replicas 1 --name my-prometheus --publish published=9090,target=9090,protocol=tcp --network my-network \ 
+itokareva/prometheus:2.0 image itokareva/prometheus:2.0
+
+itokareva/prometheus:2.0 собран с новой конфигурацией (prometheus.yml.swarm)
+	
+добавлен:
+---
+global:
+  scrape_interval: '5s'
+  external_labels:
+      monitor: 'codelab-monitor'
+
+....
+  - job_name: 'docker'
+    static_configs:
+      - targets:
+        - 'ip-host:9323'  
+
+3) построен дашборд(DockerMonitoring.json) для метрики engine_daemon_network_actions_seconds_count и создана сетевая нагрузка сервисом:
+
+docker service create \
+  --replicas 10 \
+  --name ping_service \
+  alpine ping docker.com
+
+4) Реализован alert expr: histogram_quantile(0.95, sum(rate(ui_request_response_time_bucket[5m])) by (le))>0.05 с отправкой оповещений в slack.
+
+Задание (**)
+
+Реализовано автоматическое добавление источника данных и созданных в данном ДЗ дашбордов в графану;
+    volumes:
+      - grafana_data:/var/lib/grafana
+      - ./grafana:/etc/grafana/provisioning/
+
+в файле docker/docker-compose-monitoring.yml. Все конфигурационные файлы в docker/grafana.
+1
+   
+
   
+ 	
+
+ 
