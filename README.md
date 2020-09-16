@@ -193,8 +193,169 @@ docker service create \
       - ./grafana:/etc/grafana/provisioning/
 
 в файле docker/docker-compose-monitoring.yml. Все конфигурационные файлы в docker/grafana.
-1
-   
+ 
+# Домашняя работа 24
+
+Логирование и распределенная распределенная трассировка
+
+1) Для логгирования докер контейнеров был поднят ElasticSearch-стэк:
+- создан logging/ﬂuentd/Dockerfile и файл конфигурации logging/ﬂuentd/ﬂuent.conf
+- построен образ для Fluentd, который будет использоваться в качестве Logstash (для аггрегации и трансформации данных)
+- добавлены сервисы  ElasticSearch, Fluentd, kibana в файл docker/docker-compose-logging.yml
+2) Настроена отправки логов во Fluentd для сервиса post
+3) Работа в Кибане:
+- Создание индекса
+- Просмотр логов
+- Создание фильтра по полям
+3.1) Добавление фильтра во Fluentd (ﬂuent.conf) для сервиса post
+- поиск по структурированным логам
+3.2) Настройка отправки логов во Fluentd для сервиса ui
+- Добавление фильтра во Fluentd (ﬂuent.conf) для сервиса ui: через регулярные выражения, с использованием одног и
+комбинации Grok-шаблонов
+- поиск по неструктурированным логам
+3.3) Задание (*)
+
+- создан grok-шаблон для строки лога like this:
+
+service=ui | event=request | path=/new | request_id=87b830c0-f084-44b7-aaa3-08d2636836a8 | remote_addr=10.20.78.34 | method= POST | response_status=303
+%{WORD:service} \| event=%{WORD:event} \| path=%{URIPATH:path} \| request_id=%{GREEDYDATA:request_id} \| remote_addr=%{IPV4:remote_addr} \| method= %{WORD:method} \| response_status=%{NUMBER:response_status}
+Проверен сначала в grok-constructor, затем в Kibana:
+{
+  "_index": "fluentd-20200915",
+  "_type": "access_log",
+  "_id": "exknknQB-0GOdWUzjGn9",
+  "_version": 1,
+  "_score": null,
+  "_source": {
+    "timestamp": "2020-09-15T14:24:57.851648",
+    "pid": "1",
+    "loglevel": "INFO",
+    "progname": "",
+    "message": "service=ui | event=request | path=/ | request_id=2a4de9f3-536e-413c-a220-15c01f50e2a0 | remote_addr=10.20.78.34 | method= GET | response_status=200",
+    "service": "ui",
+    "event": "request",
+    "path": "/",
+    "request_id": "2a4de9f3-536e-413c-a220-15c01f50e2a0",
+    "remote_addr": "10.20.78.34",
+    "method": "GET",
+    "response_status": "200",
+    "@timestamp": "2020-09-15T14:24:57+00:00",
+    "@log_name": "service.ui"
+  },.....
+
+4) Настрока распределенный трейсинга
+- добавление сервиса zipkin в docker/docker-compose-logging.yml
+- добавление для каждого сервиса в нашем приложении reddit параметр ZIPKIN_ENABLED (docker-compose.yml)
+- просмотр трейсов в zipkin
+
+Задание со (*)
+
+Багнутая версия не работала сначала потому что у ui не было соединения с post и comment.
+В Кибане было следующее сообщение:
+{
+  "_index": "fluentd-20200914",
+  "_type": "access_log",
+  "_id": "6LTBjnQBmKhcxZL4jQbk",
+  "_version": 1,
+  "_score": null,
+  "_source": {
+    "timestamp": "2020-09-14T22:34:42.927176",
+    "pid": "1",
+    "loglevel": "ERROR",
+    "progname": "",
+    "message": "Failed to read from Post service. Reason: Failed to open TCP connection to 127.0.0.1:4567 (Connection refused - connect(2) for \"127.0.0.1\" port 4567)",
+    "service": "ui",
+    "event": "show_all_posts",
+    "request_id": "3c93d3e1-0272-4f4a-a0cd-a7df8b711a2c",
+    "@timestamp": "2020-09-14T22:34:42+00:00",
+    "@log_name": "service.ui"
+  },
+  "fields": {
+    "@timestamp": [
+      "2020-09-14T22:34:42.000Z"
+    ],
+    "timestamp": [
+      "2020-09-14T22:34:42.927Z"
+    ]
+  },
+  "sort": [
+    1600122882000
+  ]
+
+Добавила в src_bug/bugged-code/ui/Dockerfile:
+ENV POST_SERVICE_HOST post
+ENV POST_SERVICE_PORT 5000
+ENV COMMENT_SERVICE_HOST comment
+ENV COMMENT_SERVICE_PORT 9292
+После этого приложение заработало.
+
+Просмотр поста тормозил, потому что в текст /src_bug/bugged-code/ui/ui_app.rb был вставлен sleep(3):
+@zipkin_span(service_name='post', span_name='db_find_single_post')
+def find_post(id):
+    start_time = time.time()
+    try:
+        post = app.db.find_one({'_id': ObjectId(id)})
+    except Exception as e:
+        log_event('error', 'post_find',
+                  "Failed to find the post. Reason: {}".format(str(e)),
+                  request.values)
+        abort(500)
+    else:
+        stop_time = time.time()  # + 0.3
+        resp_time = stop_time - start_time
+        app.post_read_db_seconds.observe(resp_time)
+        time.sleep(3)
+        log_event('info', 'post_find',
+                  'Successfully found the post information',
+                  {'post_id': id})
+        return dumps(post)
+
+zipkin показывает эту задержку 3s:
+
+get[3.096s]
+/post/<id>[3.067s]
+db_find_single_post[3.007s]
+
+После того как отработал get ui логгирует сообщение в Кибану:
+
+{
+  "_index": "fluentd-20200914",
+  "_type": "access_log",
+  "_id": "WLTUjnQBmKhcxZL4zQdi",
+  "_version": 1,
+  "_score": null,
+  "_source": {
+    "timestamp": "2020-09-14T22:55:43.427264",
+    "pid": "1",
+    "loglevel": "INFO",
+    "progname": "",
+    "message": "Successfully showed the post",
+    "service": "ui",
+    "event": "show_post",
+    "request_id": "eedf7f51-452f-4a87-8e9c-94a4de454f6c",
+    "@timestamp": "2020-09-14T22:55:43+00:00",
+    "@log_name": "service.ui"
+  },
+  "fields": {
+    "@timestamp": [
+      "2020-09-14T22:55:43.000Z"
+    ],
+    "timestamp": [
+      "2020-09-14T22:55:43.000Z"
+    ],
+    "timestamp": [
+      "2020-09-14T22:55:43.427Z"
+    ]
+  },
+  "highlight": {
+    "@log_name": [
+      "@kibana-highlighted-field@service.ui@/kibana-highlighted-field@"
+    ]
+  },
+  "sort": [
+    1600124143000
+  ]
+}
 
   
  	
