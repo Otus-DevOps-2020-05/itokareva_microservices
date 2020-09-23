@@ -1,0 +1,5 @@
+---
+# handlers file for k8s_master
+- name: reload kube-apiserver 
+  systemd: name=kube-apiserver state=restarted
+

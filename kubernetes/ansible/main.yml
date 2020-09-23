@@ -1,0 +1,10 @@
+- name: bootstrapping-kubernetes-controllers 
+  hosts: 178.154.224.235
+  vars:
+    v_port: '2379'
+#masters
+  become: true
+#  vars:
+#    db_host: ["${private_ip}"]
+  roles:
+    - k8s_master

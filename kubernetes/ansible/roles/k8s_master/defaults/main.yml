@@ -1,0 +1,5 @@
+---
+# defaults file for k8s_master
+db_host: 127.0.0.1
+env: local
+deploy_user: yc-user
