@@ -1,0 +1,5 @@
+---
+# vars file for k8s_master
+  vars:
+    v_port: '2379'
+

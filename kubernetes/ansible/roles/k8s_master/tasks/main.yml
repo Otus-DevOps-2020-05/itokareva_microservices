@@ -1,0 +1,3 @@
+---
+# tasks file for k8s_master
+- include: prepare_ctrl_coponents.yaml

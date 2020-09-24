@@ -357,7 +357,18 @@ db_find_single_post[3.007s]
   ]
 }
 
-  
+# Домашняя работа 25
+
+Введение в Kubernetes 
+
+1) Вручную развернуты все компоненты Kubernetes, используя The Hard Way
+2) При развертывании был применен параллельный запуск команд с использованием tmux 
+3) Созданы файлы с Deployment манифестами приложений reddit в папке kubernetes/reddit 
+4) Проверено, что по созданным deployment-ам (ui, post, mongo, comment) поды запускаются
+
+   Задание со * 
+   Создан Ansibleплейбук в папке kubernetes/ansible на установку управляющих компонентов Kubernetes из THW
+(08-bootstrapping-kubernetes-controllers.md)  
  	
 
  
