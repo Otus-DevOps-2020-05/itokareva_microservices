@@ -371,4 +371,16 @@ db_find_single_post[3.007s]
 (08-bootstrapping-kubernetes-controllers.md)  
  	
 
- 
+# Домашняя работа 26
+
+Kubernetes. Запуск Kubernetes. Запуск кластера и кластера и приложения. Модель приложения. Модель безопасности 
+
+1) Развернут Kubernetes локально с помощью утилиты minikube
+2) Изучен файл манифеста ~/.kube/conﬁg: что такое кластер и контекст
+3) Развернуто приложение reddit в minikube
+4) Рассмотрены расширения (addons) в minikube на примере Dashboard
+5) Знакомство с namespace
+6) Развернут Kubernetes cluster в YC
+7) Деплой всех компонентов приложения в namespace dev
+8) Приложение работает нормально: посты создаются и сохраняются в БД
+  
