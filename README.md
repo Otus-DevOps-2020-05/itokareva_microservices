@@ -400,3 +400,44 @@ Kubernetes. Networks,Storages.Storages.
 - PersistentVolume
 10) протестировано выделение ресурса хранилища по запросу PersistentVolumeClaim
 11) создан StorageClass Fast и протестировано динамическое выделение ресурса хранилища 
+
+# Домашняя работа 28
+CI/CD в Kubernetes
+
+1) Установлена клиентская часть helm - консольный клиент 
+2) Установлена серверная часть helm - tiller (только до версии 1.13.1)
+3) Разработаны chart-ы для компонент ui, post, comment 
+4) Создан единый chart reddit, который объединяет наши компоненты, чтобы они друг друга видели
+5) Загружены зависимости: появился файл requirements.lock с фиксацией зависимостей и архивы компонент в директории charts
+6) Установлено приложение reddit в кластере kubernetes
+7) Опробованы версии helm2 и helm3 для установки приложения reddit
+8) Подготовлен GKE-кластер и установлен GitLab
+9) Создана группа itokareva и 4 проекта: ui, post, comment и reddit
+10) под каждый проект создан репозиторий
+11) Настроен CI для проектов ui, post, comment. Использовали nginx-ingress, который был поставлен с gitlab вместо GCP 
+12) Настроен развертывание приложения по коммиту в feature-бранч (не master) на вреенное окружение review
+13) Добавлено удаление окружений по требованию (когда они больше не нужны
+14) Настроен CD на статические окружения staging и production
+15) Настроен pipeline comment с использованием helm2
+16) Настроен pipeline post с использованием helm3
+17) Синтаксис pipeline приведен в соответствие синтаксису Gitlab (.gitlab-ci.yml освобожден от секции auto_devops
+
+Задание (*)
+
+Связаны pipeline сборки (CI) с pipeline деплоя (CD) через триггер на стороне проекта deploy-reddit. 
+Теперь сразу после релиза запускается деплой на окружение staging.
+
+reddit_deploy_cd_start:
+  stage: deploy
+  only:
+    - master
+    - tags
+  script:
+    - echo "start pipline of the project reddit-deploy"
+    - apk add -U curl 
+    - "curl --request POST --form token=$TRIGGER_TOKEN --form ref=master http://gitlab-gitlab/api/v4/projects/1/trigger/pipeline"
+
+, где 1 - id проекта reddit-deploy.
+Секрет TRIGGER_TOKEN добавлен в CI/CD переменные проекта reddit-deploy
+
+
